@@ -1,15 +1,13 @@
 import fastify from "fastify";
-import { knex } from "./database";
-import crypto from "node:crypto";
 import { env } from "./env";
-
+import { transactionRoutes } from "./routes/transactions";
+import cookie from "@fastify/cookie"
+import { requestLogger } from "./middlewares/request-logger";
 const app = fastify();
 
-
-app.get("/transactions", async () => {
-	const transactions = await knex("transactions").select("*").where("amount", 1000)
-	return transactions;
-});
+app.register(cookie)
+app.addHook("preHandler", requestLogger);
+app.register(transactionRoutes, { prefix: "transactions" });
 
 app
 	.listen({
